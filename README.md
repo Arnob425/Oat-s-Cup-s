@@ -1,352 +1,281 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CCPC — Environmental Insights (Web Slides)</title>
-  <meta name="description" content="Web version of the CCPC environmental presentation with slide navigation and a video on the 2nd last slide." />
-  <style>
-    :root{
-      --bg:#0b0d10;--fg:#e8edf2;--muted:#a8b3bd;--card:#12171c;--ring:rgba(113,199,236,.4);--accent:#71c7ec
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 600px at 20% -10%,#111823,#0a0e13 60%,#070a0d 100%);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;overflow:hidden}
-    .app{height:100%;display:flex;flex-direction:column}
-    header{position:sticky;top:0;z-index:10;background:rgba(10,14,18,.45);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid rgba(255,255,255,.06)}
-    .nav{max-width:1200px;margin:auto;padding:10px 14px;display:flex;gap:10px;align-items:center}
-    .brand{font-weight:800;letter-spacing:.2px}
-    .spacer{flex:1}
-    .btn{appearance:none;border:none;background:#151a20;border:1px solid rgba(255,255,255,.08);color:var(--fg);padding:8px 12px;border-radius:12px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.35)}
-    .btn:focus{outline:none;box-shadow:0 0 0 6px var(--ring)}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Scrollable Presentation — CCPC (Web)</title>
+<style>
+  :root{
+    --bg:#071018; --card:#0f1418; --fg:#e9f1f7; --muted:#98a6b0; --accent:#63bfe6;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    background:linear-gradient(180deg,#071018 0%, #071722 100%); color:var(--fg); -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+  }
+  header{
+    position:sticky; top:0; z-index:40; backdrop-filter: blur(6px) saturate(120%);
+    background:rgba(5,8,12,0.55); border-bottom:1px solid rgba(255,255,255,0.04);
+    padding:10px 16px; display:flex; gap:12px; align-items:center;
+  }
+  .brand{font-weight:800}
+  .navspacer{flex:1}
+  .btn{appearance:none;border:0;background:#0f161b;color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
+  .btn:active{transform:translateY(1px)}
+  main{max-width:1100px;margin:28px auto;padding:0 16px}
+  section.card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:20px; margin-bottom:20px;
+    box-shadow:0 18px 50px rgba(0,0,0,0.45);
+  }
+  h1{margin:0 0 10px 0; font-size:clamp(20px,2.6vw,30px)}
+  p.muted{color:var(--muted); margin:6px 0}
+  .gallery{display:flex;gap:12px;flex-wrap:wrap}
+  .placeholder{
+    background:#081018;border-radius:12px;border:1px solid rgba(255,255,255,.04);
+    min-width:200px; min-height:140px; flex:1 1 30%; position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;
+  }
+  .placeholder img{width:100%;height:100%;object-fit:cover;display:block}
+  .ph-ui{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:6px;align-items:center}
+  .ph-ui input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);color:var(--fg)}
+  .ph-ui button{padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:#022;cursor:pointer}
+  .hint{font-size:13px;color:var(--muted);margin-top:8px}
 
-    main{flex:1;display:grid;place-items:center}
+  /* Video card tweaks */
+  .video-wrap{border-radius:12px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.04)}
+  video{width:100%;height:auto;max-height:64vh;display:block;background:#000}
 
-    /* Slide container */
-    .stage{position:relative;width:min(1100px,96vw);height:min(620px,78vh);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden}
-    .slide{position:absolute;inset:0;padding:28px 32px 22px 32px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;opacity:0;transform:translateX(40px) scale(.98);transition:.35s ease;pointer-events:none}
-    .slide.active{opacity:1;transform:none;pointer-events:auto}
-    .title{font-size:clamp(22px,2.8vw,32px);font-weight:800;letter-spacing:.2px;margin:2px 0 8px 0}
-    .content{overflow:auto;padding-right:6px}
-    .content p{color:var(--fg);opacity:.95;line-height:1.65;margin:.4rem 0}
-    .muted{color:var(--muted)}
-    .bullets{display:grid;gap:.5rem;margin:.6rem 0 0 0}
-    .bullets li{margin-left:1rem}
+  /* small screens */
+  @media (max-width:640px){
+    .ph-ui{flex-direction:column;left:8px;right:8px;bottom:8px}
+    .ph-ui input{width:100%}
+  }
 
-    /* Video slide */
-    .video-wrap{position:relative;background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-    video{display:block;width:100%;height:62vh;max-height:100%;background:#000}
-    .vcontrols{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .range{width:240px}
-
-    /* Pager */
-    .pager{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:8px}
-    .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.25);transition:.2s}
-    .dot.active{background:var(--accent);box-shadow:0 0 0 6px rgba(113,199,236,.25)}
-
-    /* Footer row inside slide */
-    .row{display:flex;align-items:center;gap:10px}
-    .row .spacer{flex:1}
-
-    /* Mobile tweaks */
-    @media (max-width:720px){
-      .stage{height:min(78vh,620px)}
-      video{height:46vh}
-      .range{width:140px}
-    }
-  </style>
+  footer{max-width:1100px;margin:12px auto 28px;padding:12px 16px;color:var(--muted);text-align:center}
+  a.link{color:var(--accent); text-decoration:none}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="nav">
-        <div class="brand">🌿 CCPC — Environmental Insights</div>
-        <div class="spacer"></div>
-        <button class="btn" id="prevBtn">← Prev</button>
-        <button class="btn" id="nextBtn">Next →</button>
+
+<header>
+  <div class="brand">🌿 CCPC — Web Presentation (Scrollable)</div>
+  <div class="navspacer"></div>
+  <button class="btn" id="toTop">Top</button>
+  <button class="btn" id="toGallery">Gallery</button>
+  <button class="btn" id="toVideo">Watch Video</button>
+</header>
+
+<main>
+  <!-- Slide 1: Intro -->
+  <section class="card" id="intro">
+    <h1>Key Environmental Insights at CCPC</h1>
+    <p class="muted">Scroll down to navigate. You can paste image URLs into gallery placeholders — they'll load instantly.</p>
+    <p>About CCPC: Established in 1961 and known for a green, serene campus with active sustainability programs.</p>
+  </section>
+
+  <!-- Slide 2: Environmental Commitment -->
+  <section class="card" id="commitment">
+    <h1>Environmental Commitment</h1>
+    <div class="content">
+      <ul>
+        <li>Holistic approach to eco-friendly operations and education.</li>
+        <li>Tree plantation programs and campus cleanliness drives.</li>
+        <li>Student-led awareness initiatives across the campus.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 3: Gallery (user-supplied image URLs) -->
+  <section class="card" id="gallery">
+    <h1>A Gallery of Green</h1>
+    <p class="muted">Paste an image URL in any placeholder below and press ↵ Enter or the Load button. Images persist in your browser (localStorage).</p>
+
+    <div class="gallery" id="galleryGrid">
+      <!-- Placeholder template repeated 3 times -->
+      <div class="placeholder" data-slot="1">
+        <div class="emptyText">Image 1</div>
+        <img style="display:none" alt="Gallery image 1"/>
+        <div class="ph-ui">
+          <input placeholder="Paste image URL..." class="img-url" />
+          <button class="loadBtn">Load</button>
+        </div>
       </div>
-    </header>
 
-    <main>
-      <div class="stage" id="stage">
-        <!-- Slides start -->
-        <section class="slide active" data-title="Key Environmental Insights at CCPC">
-          <h1 class="title">Key Environmental Insights at CCPC</h1>
-          <div class="content">
-            <p class="muted">Explore CCPC's dedication to preserving and enhancing its natural surroundings. This web presentation mirrors the slide deck.</p>
-            <p><strong>About CCPC:</strong> Established in 1961 and known for a green, serene campus with active sustainability programs.</p>
-          </div>
-          <div class="row">
-            <div class="muted">Use ← / → or buttons to navigate</div>
-            <div class="spacer"></div>
-            <div id="slideCount" class="muted"></div>
-          </div>
-        </section>
-
-        <section class="slide" data-title="Environmental Commitment">
-          <h1 class="title">Information About CCPC's Environmental Commitment</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li>Holistic approach to eco‑friendly operations and education.</li>
-              <li>Tree plantation programs and campus cleanliness drives.</li>
-              <li>Student‑led awareness initiatives across the campus.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Commitment & programs overview</div></div>
-        </section>
-
-        <section class="slide" data-title="Accolades for Environmental Leadership">
-          <h1 class="title">Accolades for Environmental Leadership</h1>
-          <div class="content">
-            <ol class="bullets">
-              <li><strong>Recognized Excellence:</strong> "Green Campus" award for sustainability practices.</li>
-              <li><strong>A Collaborative Effort:</strong> Students, faculty, staff, and partners contributed.</li>
-              <li><strong>Inspiring Future Generations:</strong> Strengthening resolve to innovate and educate.</li>
-            </ol>
-          </div>
-          <div class="row"><div class="muted">Recognition highlights</div></div>
-        </section>
-
-        <section class="slide" data-title="Campus Beauty: Nature's Embrace">
-          <h1 class="title">Campus Beauty: Nature's Embrace</h1>
-          <div class="content">
-            <p>CCPC's campus showcases majestic trees, rolling lawns, and serene pathways, framed by scenic hills — a tranquil setting for learning and reflection.</p>
-          </div>
-          <div class="row"><div class="muted">Landscape & serenity</div></div>
-        </section>
-
-        <section class="slide" data-title="A Gallery of Green">
-          <h1 class="title">A Gallery of Green: Scenes from CCPC</h1>
-          <div class="content">
-            <p>Add photos here (replace the placeholders below).</p>
-            <div class="row" style="gap:10px;flex-wrap:wrap">
-              <div style="flex:1;min-width:180px;height:140px;background:#0a0f13;border:1px solid rgba(255,255,255,.08);border-radius:12px"></div>
-              <div style="flex:1;min-width:180px;height:140px;background:#0a0f13;border:1px solid rgba(255,255,255,.08);border-radius:12px"></div>
-              <div style="flex:1;min-width:180px;height:140px;background:#0a0f13;border:1px solid rgba(255,255,255,.08);border-radius:12px"></div>
-            </div>
-          </div>
-          <div class="row"><div class="muted">Replace with campus photos</div></div>
-        </section>
-
-        <section class="slide" data-title="The Vital Role of Trees">
-          <h1 class="title">The Vital Role of Trees: Nature's Pillars</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li><strong>Clean Air Filters</strong> — absorb CO₂, release O₂, improve air quality.</li>
-              <li><strong>Natural Coolers</strong> — provide shade and reduce heat, lowering cooling needs.</li>
-              <li><strong>Water Management</strong> — reduce erosion and manage stormwater runoff.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Ecosystem services</div></div>
-        </section>
-
-        <section class="slide" data-title="Trees: A Haven for Wildlife">
-          <h1 class="title">Trees: A Haven for Wildlife</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li><strong>Deer</strong> — shelter and forage among dense foliage.</li>
-              <li><strong>Foxes</strong> — roam edges, hunt small prey, forage fruits.</li>
-              <li><strong>Snakes</strong> — control rodent populations; vital but often unseen.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Biodiversity on campus</div></div>
-        </section>
-
-        <section class="slide" data-title="Wild Boar: Guardians of the Forest Floor">
-          <h1 class="title">Wild Boar: Guardians of the Forest Floor</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li><strong>Natural Tillers</strong> — soil turnover aids seed dispersal & regeneration.</li>
-              <li><strong>Pest Control</strong> — consume insects and small rodents.</li>
-              <li><strong>Biodiversity Support</strong> — create microhabitats while foraging.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Ecological roles</div></div>
-        </section>
-
-        <section class="slide" data-title="Our Green Planet at Risk">
-          <h1 class="title">Our Green Planet at Risk: The Impact of Human Unconsciousness</h1>
-          <div class="content"><p>Human negligence threatens ecosystems through pollution, overuse of resources, and habitat loss. Awareness and action are essential.</p></div>
-          <div class="row"><div class="muted">Challenges & awareness</div></div>
-        </section>
-
-        <section class="slide" data-title="Deforestation: A Global Challenge">
-          <h1 class="title">Deforestation: A Global Challenge</h1>
-          <div class="content"><p>Forest loss worldwide disrupts climate stability, biodiversity, and local livelihoods. Understanding drivers is key to solutions.</p></div>
-          <div class="row"><div class="muted">Global perspective</div></div>
-        </section>
-
-        <section class="slide" data-title="The Scale and Consequences of Deforestation">
-          <h1 class="title">The Scale and Consequences of Deforestation</h1>
-          <div class="content"><p>Consequences include increased greenhouse gases, soil degradation, altered rainfall patterns, and species extinctions.</p></div>
-          <div class="row"><div class="muted">Impacts</div></div>
-        </section>
-
-        <section class="slide" data-title="Why Forests Matter">
-          <h1 class="title">Why Forests Matter: Climate, Biodiversity, and People</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li>Carbon sinks that moderate global warming.</li>
-              <li>Habitats supporting diverse life forms.</li>
-              <li>Resources and cultural value for communities.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Value of forests</div></div>
-        </section>
-
-        <section class="slide" data-title="Main Drivers of Deforestation">
-          <h1 class="title">Main Drivers of Deforestation</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li>Agricultural expansion and monocultures.</li>
-              <li>Logging and fuelwood demand.</li>
-              <li>Infrastructure and urban sprawl.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Root causes</div></div>
-        </section>
-
-        <section class="slide" data-title="Solutions: From Policy to Personal Action">
-          <h1 class="title">Solutions: From Policy to Personal Action</h1>
-          <div class="content">
-            <ul class="bullets">
-              <li>Stronger forest governance and protected areas.</li>
-              <li>Restoration, reforestation, and sustainable sourcing.</li>
-              <li>Community education and daily lifestyle changes.</li>
-            </ul>
-          </div>
-          <div class="row"><div class="muted">Action pathways</div></div>
-        </section>
-
-        <!-- SECOND LAST: Video slide -->
-        <section class="slide" data-title="CCPC Campus Video">
-          <h1 class="title">Now Let's Watch: CCPC Campus</h1>
-          <div class="content">
-            <div class="video-wrap">
-              <video id="vid" playsinline controls preload="metadata" poster="">
-                <!-- Put your video file in the same folder or update the src below -->
-                <source src="WhatsApp Video 2025-08-22 at 01.26.34_7aaac6ef.mp4" type="video/mp4" />
-              </video>
-            </div>
-            <div class="vcontrols">
-              <button class="btn" id="playBtn">▶️ Play</button>
-              <button class="btn" id="pauseBtn">⏸️ Pause</button>
-              <button class="btn" id="replayBtn">⟲ Replay</button>
-              <button class="btn" id="pipBtn">🗔 Picture‑in‑Picture</button>
-              <button class="btn" id="fsBtn">⛶ Fullscreen</button>
-              <input id="seek" class="range" type="range" min="0" max="100" step="0.1" value="0" />
-              <input id="vol" class="range" type="range" min="0" max="1" step="0.02" value="1" />
-            </div>
-            <p class="muted" id="timeTxt">00:00 / 00:00</p>
-          </div>
-          <div class="row"><div class="muted">Use fullscreen for best experience</div></div>
-        </section>
-
-        <!-- LAST: Thank you / team slide -->
-        <section class="slide" data-title="Team & Contact">
-          <h1 class="title">Thank You!</h1>
-          <div class="content">
-            <p><strong>Team Contributions</strong></p>
-            <ul class="bullets">
-              <li><strong>Tahsin Aman Chy</strong> — PowerPoint Presentation Designer (Class 09, Section BS‑B, Roll 28)</li>
-              <li><strong>Arnob Barua</strong> — Picture/Visual Content Contributor (Class 09, Section BS‑B, Roll 26)</li>
-            </ul>
-            <p class="muted">Learn more: ccpc.edu/sustainability • Contact: green.campus@ccpc.edu</p>
-          </div>
-          <div class="row"><div class="muted">End slide</div></div>
-        </section>
-        <!-- Slides end -->
-
-        <div class="pager" id="pager"></div>
+      <div class="placeholder" data-slot="2">
+        <div class="emptyText">Image 2</div>
+        <img style="display:none" alt="Gallery image 2"/>
+        <div class="ph-ui">
+          <input placeholder="Paste image URL..." class="img-url" />
+          <button class="loadBtn">Load</button>
+        </div>
       </div>
-    </main>
-  </div>
 
-  <script>
-    // --- Slide system ---
-    const slides = Array.from(document.querySelectorAll('.slide'));
-    const pager = document.getElementById('pager');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const slideCount = document.getElementById('slideCount');
-    let i = 0;
+      <div class="placeholder" data-slot="3">
+        <div class="emptyText">Image 3</div>
+        <img style="display:none" alt="Gallery image 3"/>
+        <div class="ph-ui">
+          <input placeholder="Paste image URL..." class="img-url" />
+          <button class="loadBtn">Load</button>
+        </div>
+      </div>
+    </div>
 
-    function syncHash(){ location.hash = '#'+(i+1); }
-    function go(n){
-      i = Math.max(0, Math.min(slides.length-1, n));
-      slides.forEach((s,idx)=> s.classList.toggle('active', idx===i));
-      updateDots();
-      if(slideCount) slideCount.textContent = `${i+1} / ${slides.length}`;
-      syncHash();
+    <p class="hint">Tip: Use direct image links (ending with .jpg, .png, .webp). If an image doesn't load, try opening the URL in a new tab first.</p>
+  </section>
+
+  <!-- Slide 4: Trees / Wildlife -->
+  <section class="card" id="trees">
+    <h1>The Vital Role of Trees</h1>
+    <ul>
+      <li>Clean Air Filters — absorb CO₂, release O₂.</li>
+      <li>Natural Coolers — shade reduces heat.</li>
+      <li>Water Management — reduce erosion and runoff.</li>
+    </ul>
+  </section>
+
+  <!-- Slide 5: Video (2nd last) -->
+  <section class="card" id="videoSlide">
+    <h1>Now Let's Watch: CCPC Campus</h1>
+    <div class="video-wrap">
+      <video id="vid" playsinline controls preload="metadata" poster="">
+        <source src="WhatsApp Video 2025-08-22 at 01.26.34_7aaac6ef.mp4" type="video/mp4">
+        Your browser doesn't support HTML5 video.
+      </video>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="playBtn">▶ Play</button>
+      <button class="btn" id="pauseBtn">⏸ Pause</button>
+      <button class="btn" id="replayBtn">⟲ Replay</button>
+      <button class="btn" id="fsBtn">⛶ Fullscreen</button>
+      <div style="flex:1"></div>
+      <label class="muted" style="font-size:13px" id="videoTime">00:00 / 00:00</label>
+    </div>
+    <p class="hint">If your video is local, keep it in the same folder as this HTML file OR click the "Open File" browser button (not provided here) to load a local file.</p>
+  </section>
+
+  <!-- Last slide -->
+  <section class="card" id="thanks">
+    <h1>Thank You!</h1>
+    <p><strong>Team Contributions</strong></p>
+    <ul>
+      <li><strong>Tahsin Aman Chy</strong> — PPT Designer</li>
+      <li><strong>Arnob Barua</strong> — Visual Content</li>
+    </ul>
+    <p class="muted">Contact: green.campus@ccpc.edu</p>
+  </section>
+</main>
+
+<footer>
+  Built for CCPC • Paste image URLs into the gallery placeholders to replace images.
+</footer>
+
+<script>
+/* Smooth anchors for the header buttons */
+document.getElementById('toTop').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+document.getElementById('toGallery').addEventListener('click', ()=> document.getElementById('gallery').scrollIntoView({behavior:'smooth'}));
+document.getElementById('toVideo').addEventListener('click', ()=> document.getElementById('videoSlide').scrollIntoView({behavior:'smooth'}));
+
+/* Gallery image loader (supports paste or manual URL) */
+(function(){
+  const placeholders = Array.from(document.querySelectorAll('.placeholder'));
+  const STORAGE_KEY = 'webpres_gallery_v1';
+
+  // load from storage
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  placeholders.forEach(ph => {
+    const slot = ph.dataset.slot;
+    const img = ph.querySelector('img');
+    const empty = ph.querySelector('.emptyText');
+    const input = ph.querySelector('.img-url');
+    const btn = ph.querySelector('.loadBtn');
+
+    // restore
+    if(saved[slot]){
+      img.src = saved[slot];
+      img.style.display = 'block';
+      empty.style.display = 'none';
+      input.value = saved[slot];
     }
 
-    function next(){ go(i+1) }
-    function prev(){ go(i-1) }
-
-    // Dots
-    function buildDots(){
-      pager.innerHTML = '';
-      slides.forEach((_,idx)=>{
-        const d = document.createElement('div');
-        d.className = 'dot';
-        d.title = 'Slide '+(idx+1);
-        d.addEventListener('click', ()=>go(idx));
-        pager.appendChild(d);
-      });
-    }
-    function updateDots(){
-      const dots = Array.from(pager.children);
-      dots.forEach((d,idx)=> d.classList.toggle('active', idx===i));
+    // load function
+    function loadFromInput(){
+      const url = input.value.trim();
+      if(!url) return;
+      // quick check for data or http
+      img.onerror = ()=> { alert('Image failed to load — check the URL or try another.'); img.style.display='none'; empty.style.display='block'; }
+      img.onload = ()=> { img.style.display='block'; empty.style.display='none'; saved[slot]=url; localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); }
+      img.src = url;
     }
 
-    // Keyboard & touch
-    window.addEventListener('keydown', (e)=>{
-      if(['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); next(); }
-      if(['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
-      if(e.key==='Home'){ go(0) }
-      if(e.key==='End'){ go(slides.length-1) }
+    // events
+    btn.addEventListener('click', loadFromInput);
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') loadFromInput(); });
+
+    // allow paste directly into page to auto-detect
+    input.addEventListener('paste', (e)=> {
+      setTimeout(()=> loadFromInput(), 10);
     });
+  });
 
-    let touchX=null;
-    window.addEventListener('touchstart', (e)=>{ touchX = e.touches[0].clientX; }, {passive:true});
-    window.addEventListener('touchend', (e)=>{
-      if(touchX==null) return;
-      const dx = (e.changedTouches[0].clientX - touchX);
-      if(Math.abs(dx) > 40) { dx<0 ? next() : prev(); }
-      touchX=null;
-    }, {passive:true});
+  // also allow dropping image URLs directly onto a placeholder
+  placeholders.forEach(ph=>{
+    ph.addEventListener('dragover', e=> e.preventDefault());
+    ph.addEventListener('drop', e=> {
+      e.preventDefault();
+      const text = (e.dataTransfer.getData('text/plain') || '').trim();
+      if(!text) return;
+      const input = ph.querySelector('.img-url');
+      input.value = text;
+      ph.querySelector('.loadBtn').click();
+    });
+  });
+})();
 
-    // Start on hash slide if present
-    const start = Math.max(1, parseInt(location.hash.replace('#',''))||1);
-    buildDots();
-    go(start-1);
+/* Video controls */
+(function(){
+  const vid = document.getElementById('vid');
+  const playBtn = document.getElementById('playBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const replayBtn = document.getElementById('replayBtn');
+  const fsBtn = document.getElementById('fsBtn');
+  const timeLabel = document.getElementById('videoTime');
 
-    // --- Video controls (2nd last slide) ---
-    const vid = document.getElementById('vid');
-    const playBtn = document.getElementById('playBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const replayBtn = document.getElementById('replayBtn');
-    const pipBtn = document.getElementById('pipBtn');
-    const fsBtn = document.getElementById('fsBtn');
-    const seek = document.getElementById('seek');
-    const vol = document.getElementById('vol');
-    const timeTxt = document.getElementById('timeTxt');
+  function fmt(t){ if(!isFinite(t)) return '00:00'; const m = Math.floor(t/60).toString().padStart(2,'0'); const s = Math.floor(t%60).toString().padStart(2,'0'); return m+':'+s; }
+  function update(){ timeLabel.textContent = fmt(vid.currentTime) + ' / ' + fmt(vid.duration); }
 
-    function fmt(t){ if(!isFinite(t)) return '00:00'; const m=Math.floor(t/60).toString().padStart(2,'0'); const s=Math.floor(t%60).toString().padStart(2,'0'); return `${m}:${s}` }
-    function updateTime(){ timeTxt.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`; seek.max = vid.duration||100; seek.value = vid.currentTime||0 }
+  if(vid){
+    playBtn.onclick = ()=> vid.play();
+    pauseBtn.onclick = ()=> vid.pause();
+    replayBtn.onclick = ()=> { vid.currentTime = 0; vid.play(); };
+    fsBtn.onclick = ()=> { if(document.fullscreenElement) document.exitFullscreen(); else vid.requestFullscreen().catch(()=>{}); };
 
-    if(vid){
-      playBtn.onclick = ()=> vid.play();
-      pauseBtn.onclick = ()=> vid.pause();
-      replayBtn.onclick = ()=> { vid.currentTime = 0; vid.play(); };
-      fsBtn.onclick = ()=> { if(document.fullscreenElement){ document.exitFullscreen(); } else { vid.requestFullscreen().catch(()=>{}); } };
-      pipBtn.onclick = async ()=> { try { if(document.pictureInPictureElement){ document.exitPictureInPicture(); } else if(document.pictureInPictureEnabled){ await vid.requestPictureInPicture(); } } catch(e){} };
-      seek.oninput = ()=> vid.currentTime = +seek.value;
-      vol.oninput = ()=> vid.volume = +vol.value;
-      vid.addEventListener('timeupdate', updateTime);
-      vid.addEventListener('loadedmetadata', updateTime);
-    }
-  </script>
+    vid.addEventListener('timeupdate', update);
+    vid.addEventListener('loadedmetadata', update);
+    // save last time to localStorage per video src
+    setInterval(()=> {
+      try{
+        const key = 'video_lasttime:' + (vid.currentSrc || 'default');
+        localStorage.setItem(key, String(vid.currentTime || 0));
+      }catch(e){}
+    }, 1500);
+    // restore if available
+    vid.addEventListener('loadedmetadata', ()=> {
+      try{
+        const key = 'video_lasttime:' + (vid.currentSrc || 'default');
+        const last = +localStorage.getItem(key) || 0;
+        if(last>0 && last < vid.duration - 2) vid.currentTime = last;
+      }catch(e){}
+    });
+  }
+})();
+
+/* small UX: allow the user to paste an image URL anywhere and press Ctrl+Shift+G to open Gallery */
+window.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='g'){
+    document.getElementById('gallery').scrollIntoView({behavior:'smooth'});
+  }
+});
+</script>
 </body>
 </html>
